@@ -51,12 +51,10 @@ class Spectral_Norm:
         setattr(module, self.name, weight_sn)
         setattr(module, self.name + '_u', u)
 
-
 def spectral_norm(module, name='weight'):
     Spectral_Norm.apply(module, name)
 
     return module
-
 
 def spectral_init(module, gain=1):
     init.xavier_uniform_(module.weight, gain)
@@ -69,12 +67,10 @@ def init_linear(linear):
     init.xavier_uniform_(linear.weight)
     linear.bias.data.zero_()
 
-
 def init_conv(conv, glu=True):
     init.xavier_uniform_(conv.weight)
     if conv.bias is not None:
         conv.bias.data.zero_()
-
 
 def leaky_relu(input):
     return F.leaky_relu(input, negative_slope=0.2)
@@ -118,8 +114,6 @@ class SelfAttention(nn.Module):
         out = self.gamma*out + x
         return out
 
-
-
 class ConditionalNorm(nn.Module):
     def __init__(self, in_channel, n_condition=148):
         super().__init__()
@@ -146,7 +140,6 @@ class ConditionalNorm(nn.Module):
         out = gamma * out + beta
 
         return out
-
 
 class GBlock(nn.Module):
     def __init__(self, in_channel, out_channel, kernel_size=[3, 3],
@@ -210,7 +203,6 @@ class GBlock(nn.Module):
 
         return out + skip
 
-
 class Generator(nn.Module):
     def __init__(self, code_dim=100, n_class=1000, chn=96, debug=False):
         super().__init__()
@@ -261,7 +253,6 @@ class Generator(nn.Module):
 
         return F.tanh(out)
 
-
 class Discriminator(nn.Module):
     def __init__(self, n_class=1000, chn=96, debug=False):
         super().__init__()
@@ -298,24 +289,19 @@ class Discriminator(nn.Module):
         self.embed.weight.data.uniform_(-0.1, 0.1)
         self.embed = spectral_norm(self.embed)
 
-    def forward(self, input, class_id):
+    def forward(self, input, class_id = -1):
         
         out = self.pre_conv(input)
         out = out + self.pre_skip(F.avg_pool2d(input, 2))
-        # print(out.size())
         out = self.conv(out)
         out = F.relu(out)
         out = out.view(out.size(0), out.size(1), -1)
         out = out.sum(2)
         out_linear = self.linear(out).squeeze(1)
-        embed = self.embed(class_id)
 
-        prod = (out * embed).sum(1)
-
-        # if self.debug == debug:
-        #     print('class_id',class_id.size())
-        #     print('out_linear',out_linear.size())
-        #     print('embed', embed.size())
-        #     print('prod', prod.size())
-
-        return out_linear + prod
+        if class_id != -1:
+            embed = self.embed(class_id)
+            prod = (out * embed).sum(1)
+            return out_linear + prod
+        else:
+            return out_linear

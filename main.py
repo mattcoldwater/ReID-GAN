@@ -30,10 +30,7 @@ def main(config):
     print('config data_loader and build logs folder')
 
     if config.train:
-        if config.model=='sagan':
-            trainer = Trainer(data_loader.loader(), config)
-        elif config.model == 'qgan':
-            trainer = qgan_trainer(data_loader.loader(), config)
+        trainer = Trainer(data_loader.loader(), config)
         trainer.train()
     else:
         tester = Tester(data_loader.loader(), config)
