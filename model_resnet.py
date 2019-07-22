@@ -289,7 +289,7 @@ class Discriminator(nn.Module):
         self.embed.weight.data.uniform_(-0.1, 0.1)
         self.embed = spectral_norm(self.embed)
 
-    def forward(self, input, class_id = -1):
+    def forward(self, input, class_id):
         
         out = self.pre_conv(input)
         out = out + self.pre_skip(F.avg_pool2d(input, 2))
@@ -299,9 +299,8 @@ class Discriminator(nn.Module):
         out = out.sum(2)
         out_linear = self.linear(out).squeeze(1)
 
-        if class_id != -1:
-            embed = self.embed(class_id)
-            prod = (out * embed).sum(1)
-            return out_linear + prod
-        else:
-            return out_linear
+
+        embed = self.embed(class_id)
+        prod = (out * embed).sum(1)
+        
+        return out_linear + prod

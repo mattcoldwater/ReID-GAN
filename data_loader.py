@@ -32,7 +32,7 @@ class Data_Loader():
     
     def load_imagenet(self):
         transforms = self.transform(True, True, True, True)
-        dataset = dsets.ImageFolder(self.path+'/imagenet', transform=transforms)
+        dataset = dsets.ImageFolder(self.path, transform=transforms)
         return dataset
 
     def load_celeb(self):

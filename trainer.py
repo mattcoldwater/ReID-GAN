@@ -239,8 +239,8 @@ class Trainer(object):
 
         self.c_loss = torch.nn.CrossEntropyLoss()
         # print networks
-        print(self.G)
-        print(self.D)
+        # print(self.G)
+        # print(self.D)
 
     def build_tensorboard(self):
         from tensorboardX import SummaryWriter

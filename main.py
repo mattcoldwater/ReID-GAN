@@ -1,3 +1,5 @@
+import os
+os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 
 from parameter import *
 from trainer import Trainer
@@ -7,7 +9,8 @@ from torch.backends import cudnn
 from utils import make_folder
 
 import glob
-import os
+
+from torch import multiprocessing as mp
 
 def main(config):
     # For fast training
@@ -37,6 +40,7 @@ def main(config):
         tester.test()
 
 if __name__ == '__main__':
+    mp.set_start_method('spawn', True) 
     config = get_parameters()
     print(config)
     main(config)
