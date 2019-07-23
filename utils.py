@@ -13,7 +13,6 @@ def make_folder(path, version):
         if not os.path.exists(os.path.join(path, version)):
             os.makedirs(os.path.join(path, version))
 
-
 def tensor2var(x, grad=False):
     if torch.cuda.is_available():
         x = x.cuda()

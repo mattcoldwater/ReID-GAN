@@ -229,13 +229,13 @@ class Generator(nn.Module):
         self.ScaledCrossReplicaBN = ScaledCrossReplicaBatchNorm2d(1*chn)
         self.colorize = SpectralNorm(nn.Conv2d(1*chn, 3, [3, 3], padding=1))
 
-    def forward(self, input, class_id):
-        codes = torch.split(input, 20, 1)
-        class_emb = self.linear(class_id)  # 128
+    def forward(self, input, class_id): 
+        codes = torch.split(input, 20, 1) #(b for batch_size) input: b, 120  codes: 6 tuples * (b, 20)
+        class_emb = self.linear(class_id)  # class_emb b, 128 class_id: b, 751
 
-        out = self.G_linear(codes[0])
+        out = self.G_linear(codes[0]) # b, 16384
         # out = out.view(-1, 1536, 4, 4)
-        out = out.view(-1, self.first_view, 4, 4)
+        out = out.view(-1, self.first_view, 4, 4) # b, 1024, 4, 4
         ids = 1
         for i, conv in enumerate(self.conv):
             if isinstance(conv, GBlock):
@@ -244,16 +244,16 @@ class Generator(nn.Module):
                 ids = ids+1
                 condition = torch.cat([conv_code, class_emb], 1)
                 # print('condition',condition.size()) #torch.Size([4, 148])
-                out = conv(out, condition)
+                out = conv(out, condition) # b, 1024, 8, 8 ->  512, 16, 16 -> 256, 32, 32 ... -> 64, 128, 128
 
             else:
                 out = conv(out)
 
-        out = self.ScaledCrossReplicaBN(out)
-        out = F.relu(out)
-        out = self.colorize(out)
+        out = self.ScaledCrossReplicaBN(out) # b, 64, 128, 128
+        out = F.relu(out) # b, 64, 128, 128
+        out = self.colorize(out) # b, 3, 128, 128
 
-        return torch.tanh(out)
+        return torch.tanh(out) # b, 3, 128, 128
         # return F.tanh(out)
 
 class Discriminator(nn.Module):
@@ -293,17 +293,18 @@ class Discriminator(nn.Module):
         self.embed = spectral_norm(self.embed)
 
     def forward(self, input, class_id):
-        
-        out = self.pre_conv(input)
-        out = out + self.pre_skip(F.avg_pool2d(input, 2))
-        out = self.conv(out)
-        out = F.relu(out)
-        out = out.view(out.size(0), out.size(1), -1)
-        out = out.sum(2)
-        out_linear = self.linear(out).squeeze(1)
+        # input batch_size, 3, (384/128, 128)
+        # class_id batch_size,
 
+        out = self.pre_conv(input) # batch_size, 64, (192/64, 64)
+        out = out + self.pre_skip(F.avg_pool2d(input, 2)) # batch_size, 64, (192/64, 64)
+        out = self.conv(out) # batch_size, 1024, 6/2, 2
+        out = F.relu(out)  # batch_size, 1024, 6/2, 2
+        out = out.view(out.size(0), out.size(1), -1) # batch_size, 1024, 12/4
+        out = out.sum(2) # batch_size, 1024
+        out_linear = self.linear(out).squeeze(1) # batch_size,
 
-        embed = self.embed(class_id)
-        prod = (out * embed).sum(1)
+        embed = self.embed(class_id) # batch_size, 1024
+        prod = (out * embed).sum(1) # batch_size
         
-        return out_linear + prod
+        return out_linear + prod # batch_size

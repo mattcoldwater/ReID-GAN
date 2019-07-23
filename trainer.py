@@ -55,6 +55,7 @@ class Trainer(object):
 
         self.n_class = config.n_class
         self.chn = config.chn
+        self.seed = config.seed
 
         # Path
         self.log_path = os.path.join(config.log_path, self.version)
@@ -235,6 +236,7 @@ class Trainer(object):
         self.d_optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, self.D.parameters()), self.d_lr, [self.beta1, self.beta2])
 
         self.c_loss = torch.nn.CrossEntropyLoss()
+
         # print networks
         # print(self.G)
         # print(self.D)

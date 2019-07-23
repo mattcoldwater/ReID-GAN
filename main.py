@@ -37,7 +37,8 @@ def main(config):
         tester.test()
 
 if __name__ == '__main__':
+
     mp.set_start_method('spawn', True) 
+
     config = get_parameters()
-    print(config)
     main(config)

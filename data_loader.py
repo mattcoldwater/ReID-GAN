@@ -86,7 +86,7 @@ def stratify_sample(labels, seed, val_size):
 class Data():
     def __init__(self, opt):
         train_transform = transforms.Compose([
-            transforms.Resize((384, 128), interpolation=3),
+            transforms.Resize((128, 128), interpolation=3), # 384
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
@@ -94,7 +94,7 @@ class Data():
         ])
 
         test_transform = transforms.Compose([
-            transforms.Resize((384, 128), interpolation=3),
+            transforms.Resize((128, 128), interpolation=3), # 384
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
@@ -244,6 +244,7 @@ class Vivalab(dataset.Dataset):
         _ = None
         del _
         return image
+
 
     @staticmethod
     def camera(file_path):
