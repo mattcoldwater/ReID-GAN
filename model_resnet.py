@@ -179,7 +179,8 @@ class GBlock(nn.Module):
         out = self.activation(out)
         if self.upsample:
             # TODO different form papers
-            out = F.upsample(out, scale_factor=2)
+            out = F.interpolate(out, scale_factor=2)
+            # out = F.upsample(out, scale_factor=2)
         out = self.conv0(out)
         if self.bn:
             out = self.HyperBN_1(out, condition)
@@ -193,7 +194,8 @@ class GBlock(nn.Module):
             skip = input
             if self.upsample:
                 # TODO different form papers
-                skip = F.upsample(skip, scale_factor=2)
+                skip = F.interpolate(skip, scale_factor=2)
+                # skip = F.upsample(skip, scale_factor=2)
             skip = self.conv_sc(skip)
             if self.downsample:
                 skip = F.avg_pool2d(skip, 2)
@@ -251,7 +253,8 @@ class Generator(nn.Module):
         out = F.relu(out)
         out = self.colorize(out)
 
-        return F.tanh(out)
+        return torch.tanh(out)
+        # return F.tanh(out)
 
 class Discriminator(nn.Module):
     def __init__(self, n_class=1000, chn=96, debug=False):
