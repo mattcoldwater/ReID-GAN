@@ -22,7 +22,7 @@ class Trainer(object):
         self.adv_loss = config.adv_loss
 
         # Model hyper-parameters
-        self.imsize = config.imsize
+        # self.imsize = config.imsize
         self.g_num = config.g_num
         self.z_dim = config.z_dim
         self.g_conv_dim = config.g_conv_dim
@@ -33,7 +33,7 @@ class Trainer(object):
         self.lambda_gp = config.lambda_gp
         self.total_step = config.total_step
         self.d_iters = config.d_iters
-        self.batch_size = config.batch_size
+        self.batch_size = config.batchid * config.batchimage # config.batch_size
         self.num_workers = config.num_workers
         self.g_lr = config.g_lr
         self.d_lr = config.d_lr
@@ -73,7 +73,6 @@ class Trainer(object):
         if self.pretrained_model:
             print('load_pretrained_model...')
             self.load_pretrained_model()
-
 
     def label_sampel(self):
         label = torch.LongTensor(self.batch_size, 1).random_()%self.n_class
@@ -214,8 +213,6 @@ class Trainer(object):
                            os.path.join(self.model_save_path, '{}_G.pth'.format(step + 1)))
                 torch.save(self.D.state_dict(),
                            os.path.join(self.model_save_path, '{}_D.pth'.format(step + 1)))
-            
-            
 
     def build_model(self):
         # code_dim=100, n_class=1000
@@ -249,7 +246,6 @@ class Trainer(object):
         
         tf_logs_path = os.path.join(self.log_path, 'tf_logs')
         self.writer = SummaryWriter(log_dir=tf_logs_path)
-
 
     def load_pretrained_model(self):
         self.G.load_state_dict(torch.load(os.path.join(
